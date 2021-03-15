@@ -9,14 +9,16 @@ latmax <- 30.5 #left eastern coordinate
 latmin <- 18.5 #right western coordinate
 
 #list netCDF files in your directory
-list.files(path="lab 10 data/Lab10data/chlor_a",pattern=".nc",full.names=T, recursive = T)
+c=list.files(pattern=".nc",path="C:/Users/Em/Documents/Course Materials/Spring 2021/Data Management/Data/lab 10 data/Lab10_data/chlor_a",full.names=T, recursive = T)
 head(c)
 
-#chl <- plyr::adply(c, 1, function(file) {
+chl <- plyr::adply(c, 1, function(file) {
 
 # open netCDF file
-  data<-nc_open(c) #replace all "c" objects with "file" if using the plyr function
+  data<-nc_open(file) #replace all "c" objects with "file" if using the plyr function
 
+ fname=basename(file) #extracts the terminal file name and saves an object
+ 
 # extract data
   lon<-ncvar_get(data,"lon")
   lat<-ncvar_get(data,"lat")
@@ -46,21 +48,33 @@ head(c)
   day<-substring(datemean,9,10)
 
 # prepare final data set by adding meta data to your data frame
-  dat.varSA<-data.frame(rep(as.integer(year), nrow(dat.varSAtmp)),
+  dat.varSA<-data.frame(fname,rep(x=as.integer(year), nrow(dat.varSAtmp)),
                       rep(as.integer(month),nrow(dat.varSAtmp)),
                       rep(as.integer(day),nrow(dat.varSAtmp)),
                       dat.varSAtmp,
                       rep("chla", nrow(dat.varSAtmp)),
                       rep(dunits,nrow(dat.varSAtmp)))
 
-  names(dat.varSA)<-c("year","month","day","lon","lat","value","unit","var")
+  names(dat.varSA)<-c("file.name","year","month","day","lon","lat","value","unit","var")
 
-# close connection
+  return(dat.varSA)
   nc_close(data)
 
-#return(dat.varSA)
 
-#}, .progress = "text", .inform = T)
+
+}, .progress = "text", .inform = T)
 
 # save csv file
-write.csv(chl,"[....]",row.names=FALSE)
+
+write.csv(x=chl,file = "C:/Users/Em/Documents/Course Materials/Spring 2021/Data Management/Data/lab 10 data/Lab10_data/processed_GOM_chla.csv",row.names=FALSE)
+
+closeAllConnections()
+
+chl_sum= chl %>% group_by(lon,lat) %>%summarise(
+  mean_chl= mean(value, na.rm=T),
+  std_chl= ad(value, na.rm=T),
+  var_chl= var(value, na.rm=T),
+  n_chl=n())
+
+summary(chl_sum)
+2+2
