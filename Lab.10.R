@@ -70,11 +70,13 @@ write.csv(x=chl,file = "C:/Users/Em/Documents/Course Materials/Spring 2021/Data 
 
 closeAllConnections()
 
+#performing the summary 
 chl_sum= chl %>% group_by(lon,lat) %>%summarise(
   mean_chl= mean(value, na.rm=T),
-  std_chl= ad(value, na.rm=T),
+  std_chl= sd(value, na.rm=T),
   var_chl= var(value, na.rm=T),
   n_chl=n())
 
 summary(chl_sum)
-2+2
+head(chl_sum)
+
